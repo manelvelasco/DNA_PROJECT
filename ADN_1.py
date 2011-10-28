@@ -8,13 +8,9 @@ This temporary script file is located here:
 import random
 r=random.random
 
-class ELEMENT:
-    def __init__(self,name,value):
-        self.__name__=name
-        self.value=value
         
 class cell:
-    def __init__(self,ENV,position):
+    def __init__(self,ENV,position=[0,0]):
         self.ADN=ENV[0][1]
         self.ENV=ENV
         self.position=position
@@ -61,40 +57,77 @@ class cell:
         except:
             return obj
     def Add_to_ENV(self,name,obj):
-        self.ENV.add([name,obj])
+        self.ENV.append([name,obj])
 
     def Get_from_ENV(self,name):
-        L=self.Find_in_ENV(self,name)
+        L=self.Find_in_ENV(name)
         if len(L)>0:
-            self.remove(L[0])
-            return L[0]
-        else:
-            return 0
+            self.ENV.remove(L[0])
+            return L[0][1]
 
 
-
-#Example of isolated execution
-
-def function1(icell):
-    print "Call to 1"
+if __name__=="__main__":
+    #Example of isolated execution
+    #This example shows how to compute the 
+    #explonential of a number in random way
+    #To do so we use the taylor aproximation of exp function
+    #exp(x)=1+x+1/2! x*x + 1/3! x*x*x etc..
     
-def function2(icell):
-    print "Call to 2"
-def function3(icell):
-    print "Call to 3"
-def function4(icell):
-    print "Call to 4"
-    icell.change_ADN_prob('Action1',.9)
+    #As you can see the computation of coefs and powers are unrelated!!!!
+    
+    #DNA Functions
+    def Compute_next_power(icell):
+        try:
+            max_pow=icell.Get_from_ENV('maxpower')
+            print max_pow
+            ep=icell.Get_from_ENV('evaluated_point')
+            icell.Add_to_ENV('maxpower',max_pow*ep)
+            ep=icell.Add_to_ENV('evaluated_point',ep)
+        except:
+            print "E1"
 
+    def Compute_next_coef(icell):
+        try:
+            max_coef=icell.Get_from_ENV('maxcoef')
+            n=icell.Get_from_ENV('n')
+            icell.Add_to_ENV('maxcoef',max_coef/(n+1))
+            icell.Add_to_ENV('n',n+1)
+        except:
+            print "E2"
+        
+    def compute_next_value(icell):
+        try:
+            val=icell.Get_from_ENV('value')
+            max_coef=icell.Get_from_ENV('maxcoef')
+            max_pow=icell.Get_from_ENV('maxpower')
+            icell.Add_to_ENV('value',val+max_coef*max_pow)
+            icell.Add_to_ENV('maxpower',max_coef)
+            icell.Add_to_ENV('maxcoef',max_pow)
+        except:
+            print "E3"
 
-
-
-ADN=[['Action1',function1,0.5],['Action2',function2,.5],['Action3',function3,0.5],['Action4',function4,0.5]]
-ENV=[['ADN',ADN],['Proteine1',1],['Proteine2',1]]
-cell1=cell(ENV,[0,0])
-
-cell1.change_ADN_prob('Action4',1)
-cell1.execute_random_acction()
-cell1.execute_random_acction()
-
-print cell1.ADN
+    def start_computation(icell):
+        icell.Add_to_ENV('maxpower',1)
+        icell.Add_to_ENV('maxcoef',1)
+        icell.Add_to_ENV('n',0)
+        icell.Add_to_ENV('value',0)
+        icell.Add_to_ENV('evaluated_point',0.5)
+        icell.change_ADN_prob('Action4', 0)
+        icell.change_ADN_prob('Action3', .999)
+        
+    ADN=[['Action1',Compute_next_power,0.25],
+         ['Action2',Compute_next_coef,.25],
+         ['Action3',compute_next_value,0.25],
+         ['Action4',start_computation,0.25]]
+    ENV=[['ADN',ADN],['Proteine1',1],['Proteine2',1]]
+    
+    cell1=cell(ENV)
+    cell1.change_ADN_prob('Action3',.8)
+    for i in range(10000):
+        print i
+        cell1.execute_random_acction()
+        print cell1.Find_in_ENV('value')
+        #print cell1.Find_in_ENV('value')
+        
+    
+    
