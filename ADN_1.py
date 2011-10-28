@@ -71,6 +71,10 @@ class cell:
         else:
             return 0
 
+
+
+#Example of isolated execution
+
 def function1(icell):
     print "Call to 1"
     
@@ -81,6 +85,8 @@ def function3(icell):
 def function4(icell):
     print "Call to 4"
     icell.change_ADN_prob('Action1',.9)
+
+
 
 
 ADN=[['Action1',function1,0.5],['Action2',function2,.5],['Action3',function3,0.5],['Action4',function4,0.5]]
